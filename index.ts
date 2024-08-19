@@ -1,5 +1,5 @@
 import { LokiJsConnection } from "@js-soft/docdb-access-loki"
-import { NodeLoggerFactory } from "@js-soft/node-logger"
+import { SimpleLoggerFactory } from "@js-soft/simple-logger"
 import { EventEmitter2EventBus } from "@js-soft/ts-utils"
 import { AccountController, Transport } from "@nmshd/transport"
 
@@ -14,40 +14,17 @@ async function createTransport(): Promise<Transport> {
     throw new Error(`Missing environment variable(s): ${notDefinedEnvironmentVariables.join(", ")}}`)
   }
 
-  const config = {
-    baseUrl: globalThis.process.env.NMSHD_TEST_BASEURL!,
-    platformClientId: globalThis.process.env.NMSHD_TEST_CLIENTID!,
-    platformClientSecret: globalThis.process.env.NMSHD_TEST_CLIENTSECRET!,
-    debug: true,
-    supportedIdentityVersion: 1,
-  }
-
   const transport = new Transport(
     LokiJsConnection.inMemory(),
-    config,
-    new EventEmitter2EventBus(() => {
-      // ignore errors
-    }),
-    new NodeLoggerFactory({
-      appenders: {
-        consoleAppender: {
-          type: "stdout",
-          layout: { type: "pattern", pattern: "%[[%p] %c - %m%]" },
-        },
-        console: {
-          type: "logLevelFilter",
-          level: "Warn",
-          appender: "consoleAppender",
-        },
-      },
-
-      categories: {
-        default: {
-          appenders: ["console"],
-          level: "TRACE",
-        },
-      },
-    })
+    {
+      baseUrl: globalThis.process.env.NMSHD_TEST_BASEURL!,
+      platformClientId: globalThis.process.env.NMSHD_TEST_CLIENTID!,
+      platformClientSecret: globalThis.process.env.NMSHD_TEST_CLIENTSECRET!,
+      debug: true,
+      supportedIdentityVersion: 1,
+    },
+    new EventEmitter2EventBus(() => {}),
+    new SimpleLoggerFactory()
   )
 
   await transport.init()

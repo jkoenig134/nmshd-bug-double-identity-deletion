@@ -11,7 +11,6 @@
   "description": "",
   "dependencies": {
     "@js-soft/docdb-access-loki": "^1.1.0",
-    "@js-soft/node-logger": "^1.2.0",
     "@js-soft/ts-serval": "^2.0.10",
     "@nmshd/crypto": "^2.0.6",
     "@nmshd/transport": "^5.0.0",
