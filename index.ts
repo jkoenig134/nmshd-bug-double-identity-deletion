@@ -2,6 +2,7 @@ import { LokiJsConnection } from "@js-soft/docdb-access-loki"
 import { SimpleLoggerFactory } from "@js-soft/simple-logger"
 import { EventEmitter2EventBus } from "@js-soft/ts-utils"
 import { AccountController, Transport } from "@nmshd/transport"
+import { LogLevel } from "typescript-logging"
 
 async function createTransport(): Promise<Transport> {
   const notDefinedEnvironmentVariables = [
@@ -24,7 +25,7 @@ async function createTransport(): Promise<Transport> {
       supportedIdentityVersion: 1,
     },
     new EventEmitter2EventBus(() => {}),
-    new SimpleLoggerFactory()
+    new SimpleLoggerFactory(LogLevel.Error)
   )
 
   await transport.init()
@@ -35,17 +36,24 @@ async function createTransport(): Promise<Transport> {
 async function run() {
   const transport = await createTransport()
 
-  const acc = await new AccountController(transport, await transport.createDatabase("asd"), transport.config).init()
+  const account = await new AccountController(transport, await transport.createDatabase("asd"), transport.config).init()
 
-  const x = await Promise.all([
-    acc.identityDeletionProcess.initiateIdentityDeletionProcess(),
-    acc.identityDeletionProcess.initiateIdentityDeletionProcess(),
+  console.log(`Starting identity deletion processes for '${account.identity.address.toString()}'.`)
+
+  const identityDeletionProcesses = await Promise.all([
+    account.identityDeletionProcess.initiateIdentityDeletionProcess(),
+    account.identityDeletionProcess.initiateIdentityDeletionProcess(),
   ])
 
-  console.log(x)
+  console.log(
+    "Resulting Identity Deletion Processes",
+    identityDeletionProcesses.map((process) => process.id.toString()).join(", ")
+  )
 }
 
-run().catch((error) => {
-  console.error(error)
-  process.exit(1)
-})
+run()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error)
+    process.exit(1)
+  })

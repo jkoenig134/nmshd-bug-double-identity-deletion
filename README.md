@@ -8,4 +8,4 @@
 ## Usage
 
 - set the environment variables `NMSHD_TEST_BASEURL`, `NMSHD_TEST_CLIENTID` and `NMSHD_TEST_CLIENTSECRET`
-- run
+- run `npm start`
